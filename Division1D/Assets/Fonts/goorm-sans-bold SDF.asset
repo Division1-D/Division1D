@@ -126,24 +126,24 @@ MonoBehaviour:
     m_FaceIndex: 0
     m_FamilyName: goorm Sans
     m_StyleName: 700
-    m_PointSize: 90
+    m_PointSize: 50
     m_Scale: 1
     m_UnitsPerEM: 1000
-    m_LineHeight: 103.50001
-    m_AscentLine: 76.5
-    m_CapLine: 64
-    m_MeanLine: 45
+    m_LineHeight: 57.5
+    m_AscentLine: 42.5
+    m_CapLine: 36
+    m_MeanLine: 25
     m_Baseline: 0
-    m_DescentLine: -27.000002
-    m_SuperscriptOffset: 76.5
+    m_DescentLine: -15
+    m_SuperscriptOffset: 42.5
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -27.000002
+    m_SubscriptOffset: -15
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -13.860001
-    m_UnderlineThickness: 2.0700002
-    m_StrikethroughOffset: 18
-    m_StrikethroughThickness: 2.0700002
-    m_TabWidth: 22
+    m_UnderlineOffset: -7.7
+    m_UnderlineThickness: 1.15
+    m_StrikethroughOffset: 10
+    m_StrikethroughThickness: 1.15
+    m_TabWidth: 12
   m_Material: {fileID: -4948631613618931040}
   m_SourceFontFileGUID: 19b1d18330453dd498c948621bf00513
   m_CreationSettings:
@@ -151,7 +151,7 @@ MonoBehaviour:
     sourceFontFileGUID: 19b1d18330453dd498c948621bf00513
     faceIndex: 0
     pointSizeSamplingMode: 0
-    pointSize: 90
+    pointSize: 50
     padding: 9
     paddingMode: 2
     packingMode: 0
