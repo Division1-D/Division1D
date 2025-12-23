@@ -79,3 +79,4 @@ crashlytics-build.properties
 # 민감한 서버 정보가 포함된 설정 파일 제외
 /[Aa]ssets/[Ss]ettings/ServerConfig.asset
 /[Aa]ssets/[Ss]ettings/ServerConfig.asset.meta
+CLAUDE.md
