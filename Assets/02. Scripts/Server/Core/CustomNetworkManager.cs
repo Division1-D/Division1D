@@ -4,7 +4,7 @@ using kcp2k;
 using Mirror;
 using UnityEngine;
 
-namespace Test
+namespace Division.Server.Core
 {
     public class CustomNetworkManager : NetworkManager
     {
