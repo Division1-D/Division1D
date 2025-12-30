@@ -62,6 +62,9 @@ namespace Division.Editor
                 
                 PlayerSettings.SetArchitecture(NamedBuildTarget.Standalone, 1);
                 PlayerSettings.SetArchitecture(NamedBuildTarget.Server, 1);
+                
+                Debug.Log($"Arch Standalone = {PlayerSettings.GetArchitecture(NamedBuildTarget.Standalone)}");
+                Debug.Log($"Arch Server     = {PlayerSettings.GetArchitecture(NamedBuildTarget.Server)}");
 
                 Debug.Log($"Build Target: {buildOptions.target}");
                 Debug.Log($"Build Subtarget: Server (ARM64)");
