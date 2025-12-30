@@ -59,15 +59,16 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: LinuxHeadlessSimulation
+          targetPlatform: StandaloneLinux64
           buildMethod: Division.Editor.ServerBuilder.BuildLinuxARM64Server
+          customParameters: -standaloneBuildSubtarget Server
           versioning: Semantic
           allowDirtyBuild: true
 
       # 5. 빌드 결과물 압축
       - name: Compress Build
         run: |
-          cd build/LinuxHeadlessSimulation
+          cd build/StandaloneLinux64
           tar -czf Division1D-Server-ARM64.tar.gz *
           mv Division1D-Server-ARM64.tar.gz ../../
           cd ../..

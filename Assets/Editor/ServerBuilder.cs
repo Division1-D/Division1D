@@ -14,7 +14,7 @@ namespace Division.Editor
     public static class ServerBuilder
     {
         // 빌드 출력 경로
-        private static readonly string BuildPath = "build/LinuxHeadlessSimulation";
+        private static readonly string BuildPath = "build/StandaloneLinux64";
         private static readonly string BuildName = "Division1D";
 
         // 서버 빌드에 포함할 씬 목록
@@ -65,7 +65,7 @@ namespace Division.Editor
                 // Unity 6.x에서는 PlayerSettings로 Architecture 설정
                 PlayerSettings.SetArchitecture(
                     NamedBuildTarget.Server,
-                    (int)OSArchitecture.ARM64  // ARM64 타겟
+                    1  // ARM64 타겟
                 );
 #endif
 
