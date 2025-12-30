@@ -65,6 +65,11 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server
           versioning: Semantic
           allowDirtyBuild: true
+          
+      - name: Cleanup IL2CPP backup folder
+        run: |
+          rm -rf build/StandaloneLinux64/*_BackUpThisFolder_ButDontShipItWithYourGame || true
+          rm -rf build/StandaloneLinux64/*_BurstDebugInformation_DoNotShip || true
 
       # 5. 빌드 결과물 압축
       - name: Compress Build
