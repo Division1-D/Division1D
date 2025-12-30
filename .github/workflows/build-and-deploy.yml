@@ -1,0 +1,195 @@
+name: Build & Deploy Server (ARM64)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-author:
+    runs-on: ubuntu-latest
+    outputs:
+      should-build: ${{ steps.check.outputs.should-build }}
+    steps:
+      - name: Check if author is Snow0406
+        id: check
+        run: |
+          AUTHOR="${{ github.event.pusher.name }}"
+          echo "Push author: $AUTHOR"
+          if [ "$AUTHOR" == "Snow0406" ]; then
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "✅ Authorized: Snow0406"
+          else
+            echo "should-build=false" >> $GITHUB_OUTPUT
+            echo "⛔ Unauthorized: Only Snow0406 can trigger server builds"
+          fi
+
+  build-and-deploy:
+    needs: check-author
+    if: needs.check-author.outputs.should-build == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      # 2. Git LFS 파일 체크아웃
+      - name: Checkout Git LFS files
+        run: git lfs checkout
+
+      # 3. Unity Library 캐싱 (빌드 속도 향상)
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-DedicatedServer-ARM64-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-DedicatedServer-ARM64-
+            Library-
+
+      # 4. Unity 빌드 (Linux ARM64 Dedicated Server)
+      - name: Build Unity Server (ARM64)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: LinuxHeadlessSimulation
+          buildMethod: Division.Editor.ServerBuilder.BuildLinuxARM64Server
+          versioning: Semantic
+          allowDirtyBuild: true
+
+      # 5. 빌드 결과물 압축
+      - name: Compress Build
+        run: |
+          cd build/LinuxHeadlessSimulation
+          tar -czf Division1D-Server-ARM64.tar.gz *
+          mv Division1D-Server-ARM64.tar.gz ../../
+          cd ../..
+
+      # 6. Oracle VM SSH 키 설정
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle_key
+          chmod 600 ~/.ssh/oracle_key
+          ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
+
+      # 7. 서버 빌드 파일 전송 (SCP)
+      - name: Transfer Build to Oracle VM
+        run: |
+          scp -i ~/.ssh/oracle_key \
+            Division1D-Server-ARM64.tar.gz \
+            ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }}:~/division1d-build.tar.gz
+
+      # 8. Oracle VM에서 Podman 컨테이너로 서버 재시작
+      - name: Deploy and Restart Server (Podman)
+        run: |
+          ssh -i ~/.ssh/oracle_key ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} << 'EOF'
+            set -e
+
+            # 기존 컨테이너 중지 및 삭제
+            echo "🛑 Stopping existing container..."
+            sudo podman rm -f unityds 2>/dev/null || echo "No running container found"
+            sleep 2
+
+            # 백업 디렉토리 생성
+            BACKUP_DIR=~/server_backups/$(date +%Y%m%d_%H%M%S)
+            mkdir -p $BACKUP_DIR
+
+            # 기존 서버 파일 백업
+            if [ -d ~/division1d ]; then
+              echo "📦 Backing up old server to $BACKUP_DIR"
+              cp -r ~/division1d $BACKUP_DIR/ || true
+            fi
+
+            # 서버 디렉토리 준비
+            echo "📥 Extracting new build..."
+            mkdir -p ~/division1d
+
+            # 기존 파일 정리 (로그는 유지)
+            find ~/division1d -type f ! -name "*.log" -delete 2>/dev/null || true
+
+            # 새 빌드 압축 해제
+            tar -xzf ~/division1d-build.tar.gz -C ~/division1d
+            rm ~/division1d-build.tar.gz
+
+            # 실행 파일 찾기 (Unity 빌드 결과물 자동 감지)
+            cd ~/division1d
+            EXEC_FILE=$(find . -maxdepth 1 -type f -executable ! -name "*.so" ! -name "*.log" | head -1)
+
+            if [ -z "$EXEC_FILE" ]; then
+              echo "❌ No executable file found!"
+              ls -la ~/division1d
+              exit 1
+            fi
+
+            EXEC_NAME=$(basename "$EXEC_FILE")
+            echo "🎯 Found executable: $EXEC_NAME"
+
+            # 실행 권한 확인
+            chmod +x "$EXEC_NAME"
+
+            # Podman 컨테이너로 서버 시작
+            echo "🚀 Starting Unity Dedicated Server in Podman..."
+            sudo podman run -d --name unityds \
+              --network host \
+              -v ~/division1d:/app:Z \
+              ubuntu:22.04 \
+              bash -lc "cd /app && exec ./$EXEC_NAME -port 7777 -logFile /app/server.log"
+
+            sleep 5
+
+            # 컨테이너 상태 확인
+            if sudo podman ps | grep -q unityds; then
+              echo "✅ Container started successfully"
+              sudo podman ps | grep unityds
+            else
+              echo "❌ Container failed to start!"
+              sudo podman logs unityds || true
+              exit 1
+            fi
+
+            # UDP 7777 포트 확인
+            echo "🔍 Checking UDP port 7777..."
+            if sudo ss -lunp | grep -q 7777; then
+              echo "✅ Server is listening on UDP 7777"
+              sudo ss -lunp | grep 7777
+            else
+              echo "⚠️  Port 7777 not detected yet (server may still be initializing)"
+            fi
+
+            # 서버 로그 확인
+            echo "📊 Server logs (last 20 lines):"
+            echo "════════════════════════════════════════"
+            tail -n 20 ~/division1d/server.log 2>/dev/null || echo "Log file not created yet"
+            echo "════════════════════════════════════════"
+          EOF
+
+      # 9. 배포 완료 알림
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "✅ SERVER DEPLOYMENT COMPLETED"
+          echo "════════════════════════════════════════"
+          echo "👤 Deployed by: Snow0406"
+          echo "🔧 Commit: ${{ github.sha }}"
+          echo "📦 Build: Linux ARM64 Dedicated Server"
+          echo "🌐 Oracle VM: ${{ secrets.ORACLE_HOST }}"
+          echo "════════════════════════════════════════"
+
+      # 10. 실패 시 알림
+      - name: Deployment Failed
+        if: failure()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "❌ SERVER DEPLOYMENT FAILED"
+          echo "════════════════════════════════════════"
+          echo "Check the logs above for details"
+          exit 1
