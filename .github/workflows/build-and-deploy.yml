@@ -97,16 +97,6 @@ jobs:
             sudo podman rm -f unityds 2>/dev/null || echo "No running container found"
             sleep 2
 
-            # 백업 디렉토리 생성
-            BACKUP_DIR=~/server_backups/$(date +%Y%m%d_%H%M%S)
-            mkdir -p $BACKUP_DIR
-
-            # 기존 서버 파일 백업
-            if [ -d ~/division1d ]; then
-              echo "📦 Backing up old server to $BACKUP_DIR"
-              cp -r ~/division1d $BACKUP_DIR/ || true
-            fi
-
             # 서버 디렉토리 준비
             echo "📥 Extracting new build..."
             mkdir -p ~/division1d

@@ -57,10 +57,11 @@ namespace Division.Editor
                     options = BuildOptions.None
                 };
 
-                PlayerSettings.SetArchitecture(
-                    NamedBuildTarget.Server,
-                    1  // ARM64 타겟
-                );
+                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
+                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Server, ScriptingImplementation.IL2CPP);
+                
+                PlayerSettings.SetArchitecture(NamedBuildTarget.Standalone, 1);
+                PlayerSettings.SetArchitecture(NamedBuildTarget.Server, 1);
 
                 Debug.Log($"Build Target: {buildOptions.target}");
                 Debug.Log($"Build Subtarget: Server (ARM64)");
