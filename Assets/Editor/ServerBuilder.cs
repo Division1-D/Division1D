@@ -55,19 +55,12 @@ namespace Division.Editor
 
                     // 빌드 옵션
                     options = BuildOptions.None
-                        // CI 환경에서는 Development Build 비활성화 (프로덕션 빌드)
-                        // | BuildOptions.Development
-                        // | BuildOptions.AllowDebugging
                 };
 
-                // Architecture를 ARM64로 설정 (Unity 6.3+)
-#if UNITY_2023_1_OR_NEWER
-                // Unity 6.x에서는 PlayerSettings로 Architecture 설정
                 PlayerSettings.SetArchitecture(
                     NamedBuildTarget.Server,
                     1  // ARM64 타겟
                 );
-#endif
 
                 Debug.Log($"Build Target: {buildOptions.target}");
                 Debug.Log($"Build Subtarget: Server (ARM64)");
