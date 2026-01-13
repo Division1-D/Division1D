@@ -35,10 +35,10 @@ namespace Player
                 Vector3 targetPos = transform.position + new Vector3(inputVec.x, inputVec.y, 0);
             
                 // MapManager에게 해당 위치로 갈 수 있는지 물어봄
-                if (MapManager.Instance.IsWalkable(targetPos))
+                if (Map.MapManager.Instance.IsWalkable(targetPos))
                 {
                     // 타일맵 기준 정확한 타일 중앙 좌표를 받아옴 (미세한 오차 방지)
-                    Vector3 centerTarget = MapManager.Instance.GetTileCenter(targetPos);
+                    Vector3 centerTarget = Map.MapManager.Instance.GetTileCenter(targetPos);
                     StartCoroutine(MoveRoutine(centerTarget));
                 }
             }
@@ -64,9 +64,9 @@ namespace Player
         // 초기화 시 위치를 타일 중앙에 맞추는 함수
         void SnapToGrid()
         {
-            if (MapManager.Instance != null)
+            if (Map.MapManager.Instance != null)
             {
-                transform.position = MapManager.Instance.GetTileCenter(transform.position);
+                transform.position = Map.MapManager.Instance.GetTileCenter(transform.position);
             }
         }
     }
