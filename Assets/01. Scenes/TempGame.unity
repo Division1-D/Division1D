@@ -2705,6 +2705,7 @@ GameObject:
   m_Component:
   - component: {fileID: 516383701}
   - component: {fileID: 516383702}
+  - component: {fileID: 516383703}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2728,6 +2729,7 @@ Transform:
   - {fileID: 275347018}
   - {fileID: 1884972024}
   - {fileID: 1956872351}
+  - {fileID: 519420032}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &516383702
@@ -2742,7 +2744,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1345afc752e4b0458872166525ff4a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  moveSpeed: 5
+  moveSpeed: 4.75
+--- !u!114 &516383703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516383700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 027d92a1d2519484bb94d5ed6c66999b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.PlayerHealth
+  maxHealth: 50
+  regenPerSecond: 0
+  moveSpeedPenaltyRatio: 0.5
 --- !u!1 &518963430
 GameObject:
   m_ObjectHideFlags: 0
@@ -2921,11 +2938,11 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.54, y: -1.5, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 516383701}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &520944928
 GameObject:
@@ -88742,6 +88759,7 @@ GameObject:
   - component: {fileID: 1884972027}
   - component: {fileID: 1884972026}
   - component: {fileID: 1884972025}
+  - component: {fileID: 1884972028}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -88833,6 +88851,20 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 50
   m_TargetDisplay: 0
+--- !u!114 &1884972028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884972023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f19730ce24766a41a67742b5aa3fcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HealthUI
+  targetHealth: {fileID: 516383703}
+  healthBarFill: {fileID: 774561462}
 --- !u!1 &1893264197
 GameObject:
   m_ObjectHideFlags: 0
@@ -91083,7 +91115,6 @@ SceneRoots:
   - {fileID: 1838416477}
   - {fileID: 1097426950}
   - {fileID: 2136942114422195687}
-  - {fileID: 519420032}
   - {fileID: 516383701}
   - {fileID: 718514110}
   - {fileID: 1254412802}
