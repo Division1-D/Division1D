@@ -8,7 +8,8 @@ namespace Player
     {
         [Header("Settings")]
         public float moveSpeed = 5f; // 이동 속도
-
+        public SeamlessDPad dPad; // 인스펙터에서 연결
+        
         private bool isMoving = false; // 현재 이동 중인지 체크
         private Vector2 inputVec;
 
@@ -20,14 +21,17 @@ namespace Player
 
         void Update()
         {
-            // 1. 이동 중이어도 입력값은 계속 갱신합니다. (Return 제거)
-            float x = Input.GetAxisRaw("Horizontal");
-            float y = Input.GetAxisRaw("Vertical");
-
+            // 모바일 입력 벡터 가져오기
+            Vector2 input = dPad.InputVector;
+            
+            // (옵션) 키보드 입력도 같이 되게 하려면 아래 줄 주석 해제
+            input.x += Input.GetAxisRaw("Horizontal");
+            input.y += Input.GetAxisRaw("Vertical");
+            
             // 대각선 이동 방지: 좌우 입력이 있으면 상하 입력 무시
-            if (x != 0) y = 0;
+            if (input.x != 0) input.y = 0;
 
-            inputVec = new Vector2(x, y);
+            inputVec = new Vector2(input.x, input.y);
 
             // 2. 이동 중이 아닐 때만 코루틴을 시작합니다.
             if (!isMoving && inputVec != Vector2.zero)
