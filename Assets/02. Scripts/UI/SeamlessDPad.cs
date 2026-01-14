@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UI
+namespace Division.UI
 {
     public class SeamlessDPad : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
     {

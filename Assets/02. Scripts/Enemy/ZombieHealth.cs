@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace Enemy
+namespace Division.Enemy
 {
     public class ZombieHealth : Core.BaseHealth
     {
