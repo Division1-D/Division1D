@@ -19,49 +19,61 @@ namespace Player
 
         void Update()
         {
-            // 이동 중이라면 입력을 받지 않음
-            if (isMoving) return;
+            // 1. 이동 중이어도 입력값은 계속 갱신합니다. (Return 제거)
+            float x = Input.GetAxisRaw("Horizontal");
+            float y = Input.GetAxisRaw("Vertical");
 
-            // 입력 받기 (상하좌우, 대각선 방지 로직 포함)
-            inputVec.x = Input.GetAxisRaw("Horizontal");
-            inputVec.y = Input.GetAxisRaw("Vertical");
+            // 대각선 이동 방지: 좌우 입력이 있으면 상하 입력 무시
+            if (x != 0) y = 0;
 
-            // 대각선 이동 방지: X축 입력이 있으면 Y축 입력 무시
-            if (inputVec.x != 0) inputVec.y = 0;
+            inputVec = new Vector2(x, y);
 
-            // 입력이 있을 때만 이동 로직 수행
-            if (inputVec != Vector2.zero)
+            // 2. 이동 중이 아닐 때만 코루틴을 시작합니다.
+            if (!isMoving && inputVec != Vector2.zero)
             {
-                Vector3 targetPos = transform.position + new Vector3(inputVec.x, inputVec.y, 0);
-            
-                // MapManager에게 해당 위치로 갈 수 있는지 물어봄
-                if (Map.MapManager.Instance.IsWalkable(targetPos))
-                {
-                    // 타일맵 기준 정확한 타일 중앙 좌표를 받아옴 (미세한 오차 방지)
-                    Vector3 centerTarget = Map.MapManager.Instance.GetTileCenter(targetPos);
-                    StartCoroutine(MoveRoutine(centerTarget));
-                }
+                StartCoroutine(MoveRoutine());
             }
         }
 
-        IEnumerator MoveRoutine(Vector3 targetPos)
+        IEnumerator MoveRoutine()
         {
             isMoving = true;
 
-            // 현재 위치에서 목표 위치까지 부드럽게 이동
-            while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
+            // 3. 입력이 있고 + 이동 가능한 동안 계속 반복 (연속 이동 로직)
+            while (inputVec != Vector2.zero)
             {
-                // MoveTowards를 사용하여 일정한 속도로 이동
-                transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
-                yield return null;
+                // 현재 입력 기준으로 목표 위치 계산
+                Vector3 targetPos = transform.position + new Vector3(inputVec.x, inputVec.y, 0);
+
+                // 갈 수 있는 곳인지 체크
+                if (MapManager.Instance.IsWalkable(targetPos))
+                {
+                    // 정확한 타일 중앙 좌표 가져오기
+                    Vector3 centerTarget = MapManager.Instance.GetTileCenter(targetPos);
+
+                    // 한 칸 이동 수행
+                    while ((centerTarget - transform.position).sqrMagnitude > Mathf.Epsilon)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, centerTarget, moveSpeed * Time.deltaTime);
+                        yield return null; // 1프레임 대기
+                    }
+
+                    // 이동 완료 후 위치 보정
+                    transform.position = centerTarget;
+                }
+                else
+                {
+                    // 벽이라면 루프를 빠져나가고 이동 종료 (멈춤)
+                    break; 
+                }
+                
+                // 루프의 끝에서 다음 프레임 입력을 확인하지 않고 
+                // while문 조건(inputVec != 0)으로 돌아가 바로 다음 이동을 시작합니다.
             }
 
-            // 이동 완료 후 위치를 정확하게 목표지점으로 고정
-            transform.position = targetPos;
             isMoving = false;
         }
 
-        // 초기화 시 위치를 타일 중앙에 맞추는 함수
         void SnapToGrid()
         {
             if (Map.MapManager.Instance != null)
@@ -70,5 +82,4 @@ namespace Player
             }
         }
     }
-   
 }
