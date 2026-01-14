@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Core;
+using Division.Core;
 
-namespace UI
+namespace Division.UI
 {
     public class HealthUI : MonoBehaviour
     {

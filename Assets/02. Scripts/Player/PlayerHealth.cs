@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Player
+namespace Division.Player
 {
     public class PlayerHealth : Core.BaseHealth
     {

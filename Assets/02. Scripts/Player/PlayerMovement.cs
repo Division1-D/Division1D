@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using Map;
+using Division.Map;
+using Division.UI;
 
 namespace Player
 {

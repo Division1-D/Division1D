@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
-namespace Map
+namespace Division.Map
 {
     public class MapManager : MonoBehaviour
     {

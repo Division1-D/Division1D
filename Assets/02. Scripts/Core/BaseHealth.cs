@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace Core
+namespace Division.Core
 {
 // 서버 연동을 고려해 로직과 데이터 처리에 집중하는 베이스 클래스
     public abstract class BaseHealth : MonoBehaviour
