@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Map;
 
 namespace Player
 {
@@ -76,9 +77,9 @@ namespace Player
 
         void SnapToGrid()
         {
-            if (Map.MapManager.Instance != null)
+            if (MapManager.Instance != null)
             {
-                transform.position = Map.MapManager.Instance.GetTileCenter(transform.position);
+                transform.position = MapManager.Instance.GetTileCenter(transform.position);
             }
         }
     }
