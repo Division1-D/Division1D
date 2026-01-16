@@ -92,7 +92,7 @@ namespace Division.Enemy
             // --- [카운터 가능 타이밍 시작] ---
             // 여기에 "삐빅" 사운드 재생 코드 추가
             Debug.Log("공격 예고! (1초 대기)");
-            zombieRender.color = Color.red;
+            zombieRender.enabled = true;
             yield return new WaitForSeconds(castTime);
 
             // --- [카운터 가능 타이밍 끝] ---
@@ -133,7 +133,7 @@ namespace Division.Enemy
                 
             }
             
-            zombieRender.color = Color.white;
+            zombieRender.enabled = false;
             // 6. 공격 종료 후 딜레이를 조금 줄지, 바로 움직일지 결정
             yield return new WaitForSeconds(1f); // 후딜레이
             
