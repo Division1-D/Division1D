@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Division.Core;
@@ -10,8 +11,8 @@ namespace Division.UI
         public BaseHealth targetHealth; // HP를 추적할 대상 (플레이어 또는 좀비)
         
         [Header("UI Component")]
-        public Image healthBarFill; // Fill Type이 Horizontal/Vertical인 이미지
-
+        public HealthBarUI[] healthBar; // Fill Type이 Horizontal/Vertical인 이미지
+        
         void OnEnable()
         {
             if (targetHealth != null)
@@ -33,9 +34,10 @@ namespace Division.UI
         // 이벤트에 의해 호출되는 함수
         void UpdateHealthBar(float current, float max)
         {
-            if (healthBarFill != null)
+            if (healthBar != null)
             {
-                healthBarFill.fillAmount = current / max;
+                for (int i = 0; i < healthBar.Length; i++)
+                    healthBar[i].SetAmount(current, max);
             }
         }
         

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Division.Map;
+using Division.Player;
 using Division.UI;
 
 namespace Player
@@ -13,15 +14,18 @@ namespace Player
         
         private bool isMoving = false; // 현재 이동 중인지 체크
         private Vector2 inputVec;
-
+        PlayerHealth playerHealth;
+    
         void Start()
         {
+            playerHealth = GetComponent<PlayerHealth>();
             // 시작 시 플레이어를 현재 위치의 타일 중앙으로 강제 정렬
             SnapToGrid();
         }
 
         void Update()
         {
+            
             // 모바일 입력 벡터 가져오기
             Vector2 input = dPad.InputVector;
             
@@ -33,7 +37,9 @@ namespace Player
             if (input.x != 0) input.y = 0;
 
             inputVec = new Vector2(input.x, input.y);
-
+            
+            if (playerHealth.GetIsDead()) inputVec = Vector2.zero;
+            
             // 2. 이동 중이 아닐 때만 코루틴을 시작합니다.
             if (!isMoving && inputVec != Vector2.zero)
             {
