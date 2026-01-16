@@ -827,6 +827,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8d2f31a4134f5148ad5a7e18343d4e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillButton
+  playerHealth: {fileID: 516383703}
   skillButtonNumber: 1
   type: 0
   coolTime: 0.5
@@ -1949,6 +1950,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2da8e7ef3698ca943b471f6524b9d96a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  playerHealth: {fileID: 516383703}
   skillBtn1: {fileID: 159685229}
   skillBtn2: {fileID: 606691396}
   playerAnimator: {fileID: 0}
@@ -3103,6 +3105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player.PlayerHealth
   maxHealth: 50
   regenPerSecond: 0
+  mobileControlCanvas: {fileID: 1097426949}
   moveSpeedPenaltyRatio: 0.5
   isDead: 0
 --- !u!1 &518963430
@@ -3949,6 +3952,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8d2f31a4134f5148ad5a7e18343d4e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillButton
+  playerHealth: {fileID: 516383703}
   skillButtonNumber: 2
   type: 0
   coolTime: 0.5

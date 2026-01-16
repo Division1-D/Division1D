@@ -1,4 +1,5 @@
 using System;
+using Division.Player;
 using UnityEngine;
 using UnityEngine.UI; // 이미지(쿨타임 표시 등) 제어를 위해 필요하다면 추가
 using UnityEngine.EventSystems;
@@ -25,6 +26,7 @@ namespace UI
 
     public class SkillButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
+        public PlayerHealth playerHealth;
         [Header("Settings")]
         public int skillButtonNumber = 0;
         public SkillButtonType type = SkillButtonType.NORMAL;
@@ -70,6 +72,7 @@ namespace UI
 
         private void Update()
         {
+            if (playerHealth.GetIsDead()) return;
             // 1. 쿨타임 회복 (공통)
             if (currentCoolTimer > 0)
             {
@@ -196,6 +199,7 @@ namespace UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (playerHealth.GetIsDead()) return;
             if (eventData.button != PointerEventData.InputButton.Left) return;
 
             isPressed = true;
@@ -212,6 +216,7 @@ namespace UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (playerHealth.GetIsDead()) return;
             if (eventData.button != PointerEventData.InputButton.Left) return;
 
             isPressed = false;

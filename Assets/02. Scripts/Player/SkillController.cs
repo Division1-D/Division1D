@@ -1,3 +1,4 @@
+using Division.Player;
 using UnityEngine;
 using UI;
 
@@ -5,6 +6,8 @@ namespace Player
 {
     public class SkillController : MonoBehaviour
     {
+        public PlayerHealth playerHealth;
+        
         [Header("UI References")] public SkillButton skillBtn1;
         public SkillButton skillBtn2;
 
@@ -19,6 +22,7 @@ namespace Player
 
         private void InitializeSkills()
         {
+            if (playerHealth.GetIsDead()) return;
             // --- 1번 스킬 설정: 게이지 (GAUGE) ---
             // 예: 소화기 (누르고 있는 동안 계속 나감)
             skillBtn1.skillButtonNumber = 2;
@@ -74,7 +78,8 @@ namespace Player
 
         void Update()
         {
-
+            if (playerHealth.GetIsDead()) return;
+            
             if (skillBtn1.IsPressed)
             {
                 gaugeUI.SetTargetSkill(skillBtn1);
