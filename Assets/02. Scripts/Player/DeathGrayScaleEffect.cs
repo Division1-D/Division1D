@@ -11,6 +11,7 @@ namespace Division.Player
         public PlayerHealth playerHealth;
         
         public Volume globalVolume;
+        private Canvas canvas;
 
         [Header("Settings")]
         [Tooltip("흑백으로 변하는 속도입니다.")]
@@ -30,7 +31,7 @@ namespace Division.Player
                 playerHealth = FindObjectOfType<PlayerHealth>();
             if (globalVolume == null)
                 globalVolume = FindObjectOfType<Volume>();
-
+            canvas=transform.GetChild(0).GetComponent<Canvas>();
             // 2. Volume 프로필에서 'Color Adjustments' 효과를 가져옵니다.
             // 에디터 설정에서 이 효과를 꼭 추가해둬야 합니다.
             if (globalVolume.profile.TryGet(out colorAdjustments))
@@ -53,6 +54,7 @@ namespace Division.Player
             if (playerHealth.GetIsDead())
             {
                 targetSaturation = -100f;
+                canvas.enabled = true;
             }
             else
             {
