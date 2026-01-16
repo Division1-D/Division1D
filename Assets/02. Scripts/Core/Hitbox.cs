@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Division.Player;
 using UnityEngine;
 using Division.Enemy;
@@ -9,7 +10,9 @@ namespace Division.Core
     {
         private string myType;
         private PlayerHealth health;
+        public Canvas canvasExclamationMark;
 
+        
         // 쿨타임 계산을 위한 변수 추가
         private float nextDamageTime = 0f;
         private float damageCooldown = 1.0f; // 1초 쿨타임
@@ -27,9 +30,10 @@ namespace Division.Core
             if (other.CompareTag("Enemy"))
             {
                 // 현재 시간이 '다음 데미지를 입을 수 있는 시간'보다 큰지 확인
-                if (Time.time >= nextDamageTime)
+                if(!canvasExclamationMark.enabled)//if (Time.time >= nextDamageTime)
                 {
-                    int damage = other.transform.parent.GetComponent<Zombie>().GetDamage();
+                    int damage = other.transform.parent.GetComponent<ZombieAttack>().GetDamage();
+                    StartCoroutine(DamageCooltime());
                     
                     if (health != null)
                     {
@@ -41,7 +45,15 @@ namespace Division.Core
     //                    Debug.Log($"Damaged! Next damage available at: {nextDamageTime}");
                     }
                 }
+                
             }
+        }
+
+        IEnumerator DamageCooltime()
+        {
+            canvasExclamationMark.enabled = true;
+            yield return new WaitForSeconds(damageCooldown);
+            canvasExclamationMark.enabled = false;
         }
     }
       
