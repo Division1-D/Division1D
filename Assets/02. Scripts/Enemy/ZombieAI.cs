@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Division.Map;
 using Division.Player;
+using UnityEditor.Rendering;
 
 namespace Division.Enemy
 {
@@ -12,11 +13,13 @@ namespace Division.Enemy
         
         [Header("Settings")]
         public float moveSpeed = 3f;
+
+        public float wanderSpeed = 0.5f; //0일시 자리에서 랜덤움직임 없음
         public float detectionRange = 10f;
         public float attackRange = 1.1f;
         
         [Header("Wander Settings")]
-        public float wanderInterval = 2.0f;
+        public float wanderInterval = 1f;
         public int wanderRadius = 3;
 
         [Header("Zone Settings")]
@@ -58,14 +61,10 @@ namespace Division.Enemy
 
         void Start()
         {
-            SnapToGrid();
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
             zombieAttack = GetComponent<ZombieAttack>();
-            if (player != null)
-            {
-                playerTarget = player.transform;
-                playerHealth = player.GetComponent<PlayerHealth>();
-            }
+            playerTarget = playerHealth.transform;
+            SnapToGrid();
+            StartCoroutine(ZombieMoveUpdate());
         }
 
         void InitializeMovePattern()
@@ -82,71 +81,57 @@ namespace Division.Enemy
             };
         }
         
-        // ZombieAI 클래스 안의 아무 곳(마지막 부분 등)에 추가하세요.
-        int GetManhattanDistance(Vector3Int a, Vector3Int b)
+        int CheckIfPlayerForward(Vector3Int a, Vector3Int b)
         {
             // x 좌표 차이의 절댓값 + y 좌표 차이의 절댓값
-            return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
+            return Mathf.Abs(b.x-a.x) + Mathf.Abs(b.y-a.y);
         }
         
-        void Update()
+        IEnumerator ZombieMoveUpdate()
         {
-            if (playerTarget == null || (playerHealth != null && playerHealth.GetIsDead()))
+            WaitForSeconds wait = new WaitForSeconds(0.1f);
+
+            while (true)
             {
-                StopAllCoroutines();
-                isMoving = false;
-                return;
-            }
-
-            if (isCounterableAttackMode) return;
-            
-            // --- [추가된 부분] 십자 1칸 범위 체크 로직 시작 ---
-            Vector3Int myGridPos = MapManager.Instance.tilemap.WorldToCell(transform.position);
-            Vector3Int targetGridPos = MapManager.Instance.tilemap.WorldToCell(playerTarget.position);
-
-            // 맨해튼 거리가 1이면 상하좌우 중 하나에 딱 붙어있다는 뜻 (대각선은 2가 됨)
-            if (GetManhattanDistance(myGridPos, targetGridPos) == 1)
-            {
-                // 1. 방향 벡터 계산 (목표 지점 - 내 지점)
-                // 예: Zombie(10,10), Player(11,10) -> (1,0) = 오른쪽
-                Vector3Int attackDir = targetGridPos - myGridPos;
-                
-                Debug.Log($"<color=red>공격 가능! (십자 범위 1칸)</color> Zombie: {myGridPos}, Player: {targetGridPos}");
-                
-                // 여기에 공격 로직(AttackCoroutine 등)을 실행하면 됩니다.
-                zombieAttack.TryCounterableAttack(attackDir);
-                isCounterableAttackMode = true;
-                return;
-                //좀비가 현재 있던 타일 중앙에서 멈춤.
-            }
-            // --- [추가된 부분] 끝 ---
-            
-            if (isMoving) return;
-
-            float distance = Vector3.Distance(transform.position, playerTarget.position);
-
-            if (!hasDetectedPlayer)
-            {
-                if (distance <= detectionRange)
+                if (playerTarget == null || (playerHealth != null && playerHealth.GetIsDead()))
                 {
-                    hasDetectedPlayer = true;
-                    StopAllCoroutines();
                     isMoving = false;
+                    yield return wait;
+                    continue; // [수정] 죽었거나 타겟 없으면 아래 로직 실행 안 하고 다음 루프로
+                }
+
+                // [핵심 문제 해결 부분]
+                if (isMoving) 
+                {
+                    yield return wait; // 0.1초 대기
+                    continue; // [수정] 대기 후, 아래 로직을 실행하지 않고 루프의 처음(while)으로 돌아갑니다.
+                }
+
+                float distance = Vector3.Distance(transform.position, playerTarget.position);
+
+                if (!hasDetectedPlayer)
+                {
+                    if (distance <= detectionRange)
+                    {
+                        hasDetectedPlayer = true;
+                        StopAllCoroutines();
+                        isMoving = false;
+                        StartCoroutine(MoveToPlayerRoutine());
+                    }
+                    else
+                    {
+                        StartCoroutine(WanderRoutine());
+                    }
                 }
                 else
                 {
-                    StartCoroutine(WanderRoutine());
-                }
-            }
-            else
-            {
-                if (distance > attackRange)
-                {
                     StartCoroutine(MoveToPlayerRoutine());
                 }
+        
+                // 루프 끝에서 한 프레임 쉬거나 대기 시간을 줍니다.
+                yield return null; 
             }
         }
-
         IEnumerator WanderRoutine()
         {
             isMoving = true;
@@ -157,32 +142,80 @@ namespace Division.Enemy
 
             if (IsWalkable(nextPos))
             {
-                yield return StartCoroutine(MoveToTarget(nextPos));
+                yield return StartCoroutine(MoveToTarget(nextPos, wanderSpeed));
             }
 
-            yield return new WaitForSeconds(Random.Range(1f, wanderInterval));
+            yield return null;//new WaitForSeconds(Random.Range(0.5f, wanderInterval));
             isMoving = false;
         }
 
         IEnumerator MoveToPlayerRoutine()
         {
             isMoving = true;
-            Vector3Int nextGridPos = GetNextStepTowards(playerTarget.position);
 
-            if (nextGridPos != currentGridPos)
+            // 플레이어를 추적하는 동안 계속 루프
+            while (playerTarget != null && !playerHealth.GetIsDead())
             {
-               yield return StartCoroutine(MoveToTarget(nextGridPos));
+                // 1. [공격 판정] 현재 타일 중앙에 서 있는 상태에서 공격 가능한지 체크
+                if (TryCheckAndAttack())
+                {
+                    // 공격이 시작되었다면, 공격이 끝날 때까지(isCounterableAttackMode가 false가 될 때까지) 대기
+                    while (isCounterableAttackMode)
+                    {
+                        yield return null;
+                    }
+                    
+                    // 공격이 끝나면 바로 다시 상황 판단 (루프 처음으로)
+                    continue; 
+                }
+
+                // 2. [이동 계산] 공격 불가능하면 다음 칸으로 이동
+                Vector3Int nextGridPos = GetNextStepTowards(playerTarget.position);
+
+                if (nextGridPos != currentGridPos)
+                {
+                    // 한 칸 이동을 수행하고 완료될 때까지 대기
+                    // 이 함수가 끝나면 좀비는 정확히 nextGridPos 타일의 중앙에 위치함
+                    yield return StartCoroutine(MoveToTarget(nextGridPos, moveSpeed));
+                }
+                else
+                {
+                    // 갈 곳이 없다면 잠시 대기
+                    yield return null;
+                }
             }
+
             isMoving = false;
         }
+        // 중앙에 있을 때 호출되는 공격 판정 함수
+        bool TryCheckAndAttack()
+        {
+            if (!zombieAttack.canCounterableAttack) return false;
+            Vector3Int myGridPos = MapManager.Instance.tilemap.WorldToCell(transform.position);
+            Vector3Int targetGridPos = MapManager.Instance.tilemap.WorldToCell(playerTarget.position);
 
-        IEnumerator MoveToTarget(Vector3Int targetGridPos)
+            // 자기가 보는방향 바로 앞에 플레이어가 있으면 공격 시도
+            if (CheckIfPlayerForward(myGridPos, targetGridPos) == 1)
+            {
+                Vector3Int attackDir = targetGridPos - myGridPos;
+
+                Debug.Log($"<color=red>중앙 도착 후 공격 시도! Zombie: {myGridPos}</color>");
+
+                // 공격 상태로 전환
+                isCounterableAttackMode = true;
+                zombieAttack.TryCounterableAttack(attackDir);
+                
+                return true; // 공격 시작함
+            }
+            return false; // 공격 안 함
+        }
+        IEnumerator MoveToTarget(Vector3Int targetGridPos, float speed)
         {
             Vector3 targetWorldPos = MapManager.Instance.GetTileCenter(new Vector3(targetGridPos.x, targetGridPos.y, 0));
 
             while ((targetWorldPos - transform.position).sqrMagnitude > Mathf.Epsilon)
             {
-                transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, speed * Time.deltaTime);
                 yield return null;
             }
 
@@ -217,7 +250,7 @@ namespace Division.Enemy
             }
         }
 
-        // === [수정됨] A* 길찾기 (가로 이동 우선) ===
+        // === A* 길찾기 (가로 이동 우선) ===
         Vector3Int GetAStarNextStep(Vector3Int start, Vector3Int target)
         {
             if (start == target) return start;
@@ -275,18 +308,24 @@ namespace Division.Enemy
             return start; // 경로 없음
         }
 
-        // === [핵심 변경] 가로 우선 휴리스틱 함수 ===
-        // 목표까지 남은 거리를 계산할 때, X축 거리에 가중치를 더 부여합니다.
-        // 이렇게 하면 X축 거리를 줄이는(가로 이동) 선택이 Y축 거리를 줄이는 선택보다 F값을 더 낮추게 됩니다.
+       
+        // === 동적 가중치 휴리스틱 함수 ===
         int GetWeightedHeuristic(Vector3Int a, Vector3Int b)
         {
             int dx = Mathf.Abs(a.x - b.x);
             int dy = Mathf.Abs(a.y - b.y);
 
-            // X축 거리 1칸 = 비용 11 (가중치 높음 -> 빨리 없애고 싶어함 -> 우선 선택)
-            // Y축 거리 1칸 = 비용 10 (표준)
-            // 즉, X거리가 줄어드는 쪽이 Y거리가 줄어드는 쪽보다 '예상 남은 비용'이 더 급격히 감소하므로 선호됨.
-            return (dx * 11) + (dy * 10);
+            // 거리가 더 많이 남은 축을 우선적으로 줄이도록 가중치를 부여합니다.
+            // X축 거리가 Y축 거리보다 크거나 같으면 -> X축 이동 우선 (dx에 높은 가중치)
+            if (dx >= dy)
+            {
+                return (dx * 11) + (dy * 10);
+            }
+            // Y축 거리가 더 크면 -> Y축 이동 우선 (dy에 높은 가중치)
+            else
+            {
+                return (dx * 10) + (dy * 11);
+            }
         }
 
         Vector3Int RetracePath(Node startNode, Node endNode)
