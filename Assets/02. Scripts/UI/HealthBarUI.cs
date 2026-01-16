@@ -13,12 +13,18 @@ namespace Division.UI
         private void Start()
         {
             healthBarFill = GetComponent<Image>();
-            healthText = transform.GetChild(0).GetComponent<TMP_Text>();
+            Debug.Log(name+", "+healthBarFill);
+            if(transform.childCount>0) healthText = transform.GetChild(0).GetComponent<TMP_Text>();
         }
 
         public void SetAmount(float current, float max)
         {
+            if (healthBarFill == null)
+                healthBarFill = GetComponent<Image>();
             healthBarFill.fillAmount = current / max;
+            
+            Debug.Log(name+", hp="+current+"/"+max);
+            
             if (healthText != null)
             {
                 healthText.text = $"{current:f0}/{max:f0}";
