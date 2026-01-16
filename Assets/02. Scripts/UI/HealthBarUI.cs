@@ -23,7 +23,7 @@ namespace Division.UI
                 healthBarFill = GetComponent<Image>();
             healthBarFill.fillAmount = current / max;
             
-            Debug.Log(name+", hp="+current+"/"+max);
+//            Debug.Log(name+", hp="+current+"/"+max);
             
             if (healthText != null)
             {

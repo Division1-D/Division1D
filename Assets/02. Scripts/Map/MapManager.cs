@@ -26,12 +26,10 @@ namespace Division.Map
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
-        }
-
-        void Start()
-        {
+            
             ParseTilemapData();
         }
+
 
         // 게임 시작 시 타일맵 전체를 스캔하여 데이터화 합니다.
         void ParseTilemapData()
