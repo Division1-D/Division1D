@@ -31,12 +31,6 @@ namespace Division.UI
             }
         }
 
-        private void Start()
-        {
-            //임시
-            UpdateHealthBar(45, 50);
-        }
-
         // 이벤트에 의해 호출되는 함수
         void UpdateHealthBar(float current, float max)
         {
