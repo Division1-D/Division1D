@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MobileControllerCanvas
   - Enemy
+  - EffectController
   layers:
   - Default
   - TransparentFX
