@@ -38,6 +38,8 @@ namespace Division.Enemy
 
         private Vector3Int[,] movePattern;
 
+        public bool isCounterableAttackMode=false;
+
         // A* 노드 (int형 비용 계산을 위해 수정)
         private class Node
         {
@@ -95,6 +97,8 @@ namespace Division.Enemy
                 isMoving = false;
                 return;
             }
+
+            if (isCounterableAttackMode) return;
             
             // --- [추가된 부분] 십자 1칸 범위 체크 로직 시작 ---
             Vector3Int myGridPos = MapManager.Instance.tilemap.WorldToCell(transform.position);
@@ -103,9 +107,17 @@ namespace Division.Enemy
             // 맨해튼 거리가 1이면 상하좌우 중 하나에 딱 붙어있다는 뜻 (대각선은 2가 됨)
             if (GetManhattanDistance(myGridPos, targetGridPos) == 1)
             {
+                // 1. 방향 벡터 계산 (목표 지점 - 내 지점)
+                // 예: Zombie(10,10), Player(11,10) -> (1,0) = 오른쪽
+                Vector3Int attackDir = targetGridPos - myGridPos;
+                
                 Debug.Log($"<color=red>공격 가능! (십자 범위 1칸)</color> Zombie: {myGridPos}, Player: {targetGridPos}");
                 
                 // 여기에 공격 로직(AttackCoroutine 등)을 실행하면 됩니다.
+                zombieAttack.TryCounterableAttack(attackDir);
+                isCounterableAttackMode = true;
+                return;
+                //좀비가 현재 있던 타일 중앙에서 멈춤.
             }
             // --- [추가된 부분] 끝 ---
             

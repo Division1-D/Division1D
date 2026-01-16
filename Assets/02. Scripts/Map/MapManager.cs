@@ -47,9 +47,14 @@ namespace Division.Map
                     if (tile != null)
                     {
                         // 타일 이름이 벽 리스트에 포함되어 있는지 확인
+                        Vector3Int pos = new Vector3Int(bounds.xMin + x, bounds.yMin + y, 0);
+
+                        // [추가됨] 모든 타일의 LockColor 플래그를 미리 해제합니다.
+                        // 이제 어디서든 tilemap.SetColor(pos, Color.red)를 바로 쓸 수 있습니다.
+                        tilemap.SetTileFlags(pos, TileFlags.None);
+
                         if (wallTileNames.Contains(tile.name))
                         {
-                            Vector3Int pos = new Vector3Int(bounds.xMin + x, bounds.yMin + y, 0);
                             obstacleMap.Add(pos, true);
                         }
                     }
@@ -63,16 +68,7 @@ namespace Division.Map
         public bool IsWalkable(Vector3 targetWorldPos)
         {
             Vector3Int gridPos = tilemap.WorldToCell(targetWorldPos);
-
-            // 1. 딕셔너리에 해당 좌표가 있고, 값이 true라면 벽이다.
-            if (obstacleMap.ContainsKey(gridPos) && obstacleMap[gridPos])
-            {
-                return false;
-            }
-
-            // 2. (선택사항) 타일이 아예 없는 곳으로도 못 가게 하려면 아래 주석 해제
-            // if (!tilemap.HasTile(gridPos)) return false;
-
+            if (obstacleMap.ContainsKey(gridPos) && obstacleMap[gridPos]) return false;
             return true;
         }
 
