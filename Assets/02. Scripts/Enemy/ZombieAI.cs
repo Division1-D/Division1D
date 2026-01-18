@@ -29,7 +29,7 @@ namespace Division.Enemy
         public PlayerHealth playerHealth;
 
         private bool isMoving = false;
-        private bool hasDetectedPlayer = false;
+        public bool hasDetectedPlayer = false;
         private Vector3Int currentGridPos;
 
         // 방향 단축어

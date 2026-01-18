@@ -14,15 +14,24 @@ namespace Player
         [Header("Player State")] public Animator playerAnimator; // 애니메이션 연동 예시
 
         public SkillGaugeUI gaugeUI;
-
+        RoleManager roleManager;
         private void Start()
         {
+            roleManager = GetComponent<RoleManager>();
+            
             InitializeSkills();
         }
 
         private void InitializeSkills()
         {
             if (playerHealth.GetIsDead()) return;
+         
+            // --- 1번 스킬 설정: 게이지 (GAUGE) ---
+            // 예: 소화기 (누르고 있는 동안 계속 나감)
+            skillBtn1.skillButtonNumber = 2;
+            skillBtn1.type = SkillButtonType.NORMAL;
+            
+            /*
             // --- 1번 스킬 설정: 게이지 (GAUGE) ---
             // 예: 소화기 (누르고 있는 동안 계속 나감)
             skillBtn1.skillButtonNumber = 2;
@@ -31,7 +40,6 @@ namespace Player
             skillBtn1.gaugeInitialUse = 25f;
             skillBtn1.gaugeCapacity = 10f; // 초당 소모
             skillBtn2.gaugeRecovery = 5f;
-
             // 실제 동작 연결 (bool 값으로 켜짐/꺼짐 전달됨)
             skillBtn1.onGaugeSkill = (isActive) =>
             {
@@ -40,6 +48,7 @@ namespace Player
                     Debug.Log("플레이어: 소화기 ON");
                     // fireSprayEffect.SetActive(true);
                     //gaugeUI.SetTargetSkill(skillBtn1);
+                    
                 }
                 else
                 {
@@ -47,7 +56,14 @@ namespace Player
                     // fireSprayEffect.SetActive(false);
                 }
             };
-
+            */
+            
+            if (skillBtn1.IsPressed)
+            {
+              //  roleManager.UseSkill(0);
+                //gaugeUI.SetTargetSkill(skillBtn1);
+            }
+            
 
             // --- (참고) 2번 스킬을 CHARGE
             skillBtn2.type = SkillButtonType.CHARGE;
@@ -82,7 +98,8 @@ namespace Player
             
             if (skillBtn1.IsPressed)
             {
-                gaugeUI.SetTargetSkill(skillBtn1);
+                
+                //gaugeUI.SetTargetSkill(skillBtn1);
             }
             else if (skillBtn2.IsPressed)
             {

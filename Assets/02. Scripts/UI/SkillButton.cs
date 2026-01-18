@@ -60,6 +60,8 @@ namespace UI
         public bool IsPressed => isPressed;
         
         private Image coolTimeFillImage;
+        
+        public RoleManager roleManager;
 
         private void Start()
         {
@@ -67,7 +69,7 @@ namespace UI
             // 초기화
             currentGauge = maxGauge;
             currentCoolTimer = 0f;
-
+            
         }
 
         private void Update()
@@ -226,12 +228,14 @@ namespace UI
                 if (currentCoolTimer <= 0)
                 {
                     Debug.Log($"[{skillButtonNumber}] 일반 스킬 발동");
+                    roleManager.UseSkill(skillButtonNumber);
                     onNormalSkill?.Invoke();
                     currentCoolTimer = coolTime;
                 }
                 else
                 {
                     Debug.Log($"[{skillButtonNumber}] 쿨타임 중입니다.");
+                    
                 }
             }
             else if (type == SkillButtonType.GAUGE)

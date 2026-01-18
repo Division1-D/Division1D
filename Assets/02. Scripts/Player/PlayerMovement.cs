@@ -15,6 +15,8 @@ namespace Player
         private bool isMoving = false; // 현재 이동 중인지 체크
         private Vector2 inputVec;
         PlayerHealth playerHealth;
+        
+        public Vector2 currentDirection=Vector2.down;
     
         void Start()
         {
@@ -39,6 +41,10 @@ namespace Player
             inputVec = new Vector2(input.x, input.y);
             
             if (playerHealth.GetIsDead()) inputVec = Vector2.zero;
+            
+            //현재 보고있는 방향
+            if(inputVec!=Vector2.zero) currentDirection = inputVec;
+
             
             // 2. 이동 중이 아닐 때만 코루틴을 시작합니다.
             if (!isMoving && inputVec != Vector2.zero)
@@ -82,7 +88,7 @@ namespace Player
                 // 루프의 끝에서 다음 프레임 입력을 확인하지 않고 
                 // while문 조건(inputVec != 0)으로 돌아가 바로 다음 이동을 시작합니다.
             }
-
+            
             isMoving = false;
         }
 
